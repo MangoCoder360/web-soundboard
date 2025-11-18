@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <title>gambling</title>
+</head>
+<body>
+
+<div id="container">
+    <h1>welcome to casino</h1>
+    <p id="status">21+ only!!! (honor system)</p>
+    <h2><span id="gyro-count">0</span> gyros</h2>
+    <div class="window-border">
+        <div class="window">
+            <div class="outer-col">
+                <div class="col"></div>
+            </div>
+            <div class="outer-spacer"></div>
+            <div class="outer-col">
+                <div class="col"></div>
+            </div>
+            <div class="outer-spacer"></div>
+            <div class="outer-col">
+                <div class="col"></div>
+            </div>
+            <div class="outer-spacer"></div>
+            <div class="outer-col">
+                <div class="col"></div>
+            </div>
+            <div class="outer-spacer"></div>
+            <div class="outer-col">
+                <div class="col"></div>
+            </div>
+        </div>
+    </div>
+
+    <input type="button" onclick="spin(this)" class="start-button" value="gamble your hard earned gyros"/>
+    <input id="bet-amount" type="number" value="5" min="1" max="999"/>
+    <label for="bet-amount">gyros (bet amount)</label>
+</div>
+
+</body>
+</html>
+<script>
+    // slot machine logic
+    // credit to https://github.com/flixrp/HTML-slot-machine-example for the base code
+    const ICONS = ['apple', 'apricot', 'banana', 'big_win', 'cherry', 'grapes', 'lemon', 'orange', 'pear', 'strawberry', 'watermelon', 'gooby', 'mango_soup'];
+    const BASE_SPINNING_DURATION = 2.5; // seconds
+    const COLUMN_SPINNING_DURATION = 0.6; // seconds
+    var cols, betAmount;
+
+    window.addEventListener('DOMContentLoaded', function(event) {
+        cols = document.querySelectorAll('.col');
+
+        setInitialItems();
+        loadGyroCount();
+    });
+
+    function loadGyroCount() {
+        var gyros = Cookies.get('gyros');
+        if (gyros === undefined) {
+            Cookies.set('gyros', 0);
+            gyros = 0;
+        }
+        document.getElementById('gyro-count').innerText = gyros;
+    }
+
+    function addGyros(amount) {
+        var gyros = parseInt(Cookies.get('gyros') || '0', 0);
+        gyros += amount;
+        Cookies.set('gyros', gyros);
+        document.getElementById('gyro-count').innerText = gyros;
+    }
+
+    function setInitialItems() {
+        let baseItemAmount = 80;
+
+        for (let i = 0; i < cols.length; ++i) {
+            let col = cols[i];
+            let amountOfItems = baseItemAmount + (i * 3); // Increment the amount for each column
+            let elms = '';
+            let firstThreeElms = '';
+
+            for (let x = 0; x < amountOfItems; x++) {
+                let icon = getRandomIcon();
+                let item = '<div class="icon" data-item="' + icon + '"><img src="items/' + icon + '.png"></div>';
+                elms += item;
+
+                if (x < 3) firstThreeElms += item; // Backup the first three items because the last three must be the same
+            }
+            col.innerHTML = elms + firstThreeElms;
+        }
+    }
+
+    function spin(elem) {
+        // first, check if they have enough gyros to spin and subtract the cost
+        betAmount = parseInt(document.getElementById('bet-amount').value || '5', 0);
+        if (isNaN(betAmount) || betAmount < 1) {
+            betAmount = 5;
+        }
+        var gyros = parseInt(Cookies.get('gyros') || '0', 0);
+        if (gyros < betAmount) {
+            document.getElementById('status').innerText = "not enough gyros to gamble";
+            return;
+        }
+        addGyros(-betAmount); // charge the user the bet amount to play
+
+        document.getElementById('status').innerText = "good luck";
+
+        let duration = BASE_SPINNING_DURATION + randomDuration();
+
+        for (let col of cols) { // set the animation duration for each column
+            duration += COLUMN_SPINNING_DURATION + randomDuration();
+            col.style.animationDuration = duration + "s";
+        }
+
+        // disable the start-button
+        elem.setAttribute('disabled', true);
+
+        // set the spinning class so the css animation starts to play
+        document.getElementById('container').classList.add('spinning');
+
+        // set the result delayed
+        // this would be the right place to request the combination from the server
+        window.setTimeout(computeResults, BASE_SPINNING_DURATION * 1000 / 2);
+
+        window.setTimeout(function () {
+            // after the spinning is done, remove the class and enable the button again
+            document.getElementById('container').classList.remove('spinning');
+            elem.removeAttribute('disabled');
+        }.bind(elem), duration * 1000);
+    }
+
+    function computeResults() {
+        // randomly decide if the user should win or not
+
+        let winChance = 0.25;
+
+        if(betAmount < 6) {
+            winChance = 0.5;
+        }
+        if(betAmount > 99) {
+            winChance = 0.1;
+        }
+        
+        let shouldWin = Math.random() < winChance;
+        setResult(shouldWin);
+
+        // Don't update status immediately, wait until spinning is done
+        window.setTimeout(function() {
+            if (shouldWin) {
+            addGyros(betAmount * 3); // reward the user with 3x their bet amount
+            document.getElementById('status').innerText = "you won. i give you some gyros";
+            } else {
+            document.getElementById('status').innerText = "bozo";
+            }
+        }, (BASE_SPINNING_DURATION + COLUMN_SPINNING_DURATION * cols.length) * 750);
+    }
+
+    // bool for if they should win or not
+    function setResult(win) {
+        for (let col of cols) {
+
+            // generate 3 random items
+            let results = [
+                getRandomIcon(),
+                getRandomIcon(),
+                getRandomIcon()
+            ];
+
+            if (win == true) {
+                results = ['gooby', 'big_win', 'mango_soup'];
+            }
+            else {
+                // make it a chance to have that coulmn be the win column even if its not a total win
+                if (Math.random() < 0.5) {
+                    results[0] = 'gooby';
+                }
+                if (Math.random() < 0.5) {
+                    results[1] = 'big_win';
+                }
+                if (Math.random() < 0.5) {
+                    results[2] = 'mango_soup';
+                }
+            }
+
+            let icons = col.querySelectorAll('.icon img');
+            // replace the first and last three items of each column with the generated items
+            for (let x = 0; x < 3; x++) {
+                icons[x].setAttribute('src', 'items/' + results[x] + '.png');
+                icons[(icons.length - 3) + x].setAttribute('src', 'items/' + results[x] + '.png');
+            }
+        }
+    }
+
+    function getRandomIcon() {
+        return ICONS[Math.floor(Math.random() * ICONS.length)];
+    }
+
+    function randomDuration() {
+        return Math.floor(Math.random() * 10) / 100;
+    }
+</script>
+<style>
+    /*
+    * Some general styling
+    */
+
+    * {
+        box-sizing: border-box;
+    }
+
+    :root {
+        --item-height: 100px;
+    }
+
+    body {
+        background-color: #893802;
+        background-image: url("https://cdn.reuben.zip/classclock/background.jpg");
+        margin: 0;
+        font-family: sans-serif;
+        color: white;
+    }
+
+    h1,h2,p {
+        text-align: center;
+        color: white;
+        margin: 0 0 10px 0;
+    }
+
+    /*
+    * Style the orange box
+    */
+
+    .start-button {
+        display: block;
+        margin: 1em auto;
+    }
+
+    #container {
+        background-color: #192428;
+        border-radius: 5px;
+        padding: 50px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        margin-left: -320px;
+        margin-top: -220px;
+    }
+
+    .window {
+        position: relative;
+        overflow: hidden;
+        height: calc(3 * var(--item-height));
+    }
+
+    .window::before {
+        content: "";
+        clear: both;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+    }
+
+    .window::after {
+        content: "";
+        clear: both;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background-image: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.4));
+    }
+
+    .window-border {
+        padding: 5px;
+        background-image: linear-gradient(to bottom, #fcf8ad, #f8f3cd, #f9e13d);
+        box-shadow: 0 6px 4px -5px #eca654 inset;
+    }
+
+    /*
+    * Reels and icon styling
+    */
+
+    .icon {
+        width: 80px;
+        height: var(--item-height);
+        display: block;
+        position: relative;
+
+        /*animation: wiggle 0.1s linear infinite;*/
+    }
+
+    .outer-col {
+        overflow-y: hidden;
+        width: 100px;
+        float: left;
+        background-color: #eee;
+        background: url("https://api.cr.reubenschiopu.com/static/leo-aerts-official-2.jpg") center center / 100% 100% no-repeat;
+        height: calc(var(--item-height) * 3);
+    }
+
+    .outer-spacer {
+        width: 8px;
+        height: 100%;
+        float: left;
+        border-right: 2px solid #f7ce6c38;
+        background-image: #fcf8ad
+    }
+
+    .col {
+        padding: 0 10px;
+        will-change: true;
+        transform: translateY(calc(-100% + var(--item-height) * 3));
+    }
+
+    .col img {
+        width: 100%;
+        height: auto;
+        margin: 10px 0;
+        position: relative;
+        z-index: 3;
+    }
+
+    /* shadow effect behind the items */
+    .col .icon::after {
+        content: "";
+        clear: both;
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 1px;
+        height: 1px;
+        background-color: white;
+        box-shadow: 0 0 35px 30px rgba(12, 0, 14, 0.69);
+        z-index: 2;
+        border-radius: 100%;
+    }
+
+    /*
+    * Spinning animation
+    */
+
+    #container.spinning .outer-col:nth-of-type(2) .col {
+        animation-delay: 0.01s;
+    }
+
+    #container.spinning .outer-col:nth-of-type(3) .col {
+        animation-delay: 0.02s;
+    }
+
+    #container.spinning .outer-col:nth-of-type(4) .col {
+        animation-delay: 0.03s;
+    }
+
+    #container.spinning .col {
+        animation-name: scroll;
+        animation-iteration-count: 1;
+        animation-timing-function: cubic-bezier(.65, .97, .72, 1);
+    }
+
+    @keyframes scroll {
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    /*@keyframes wiggle {
+        0% {
+            transform: rotate(7deg);
+        }
+        50% {
+            transform: rotate(-7deg);
+        }
+        100% {
+            transform: rotate(7deg);
+        }
+    }*/
+</style>

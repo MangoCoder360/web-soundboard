@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <link href="/styles.css" rel="stylesheet">
+    <script src="/script.js" defer></script>
+    <title>web soundboard</title>
+</head>
+<body onload="init()">
+    <h1>soundboard balls</h1>
+    <h2>my gyros: <span id="gyros-amount"></span></h2>
+    <button onclick="getMoreGyros()">get more gyros</button>
+    <button onclick="pullNewBoosterPack()">pull a new booster pack (50 gyros)</button>
+    <button onclick="openSlotsUi()">go to the slots machines</button>
+
+    <h2>my inventory:</h2>
+    <div id="inventory"></div>
+</body>
+<div id="slots-ui-container" style="display: none;">
+    <iframe id="slots-ui" src="/slots.html"></iframe>
+    <button onclick="closeSlotsUi()">quit while you're ahead</button>
+</div>
+</html>
