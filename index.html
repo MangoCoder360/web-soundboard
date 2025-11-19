@@ -7,19 +7,24 @@
     <link href="/styles.css" rel="stylesheet">
     <script src="/script.js" defer></script>
     <title>web soundboard</title>
+    <audio id="ui-sfx-player" hidden></audio>
 </head>
 <body onload="init()">
     <h1>soundboard balls</h1>
     <h2>my gyros: <span id="gyros-amount"></span></h2>
     <button onclick="getMoreGyros()">get more gyros</button>
-    <button onclick="pullNewBoosterPack()">pull a new booster pack (50 gyros)</button>
-    <button onclick="openSlotsUi()">go to the slots machines</button>
-
-    <h2>my inventory:</h2>
-    <div id="inventory"></div>
+    <button onclick="openSlotsUi()">go to the sl0ts machines</button><br><br><br>
+    <audio src="/sfx/boom.mp3" controls></audio>
+    <audio src="/sfx/fard.mp3" controls></audio>
+    <audio src="/sfx/saul_goodman.mp3" controls></audio>
+    <audio src="/sfx/bababooey.mp3" controls></audio>
 </body>
 <div id="slots-ui-container" style="display: none;">
     <iframe id="slots-ui" src="/slots.html"></iframe>
     <button onclick="closeSlotsUi()">quit while you're ahead</button>
+</div>
+<div id="ad" style="display: none;">
+    <div id="ad-header"></div>
+    <video id="ad-video" src="zackdfilms.mp4"></video>
 </div>
 </html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <title>gambling</title>
+    <audio id="sfx-player" hidden></audio>
 </head>
 <body>
 
@@ -105,6 +106,7 @@
             return;
         }
         addGyros(-betAmount); // charge the user the bet amount to play
+        playSfx('slots_spinning');
 
         document.getElementById('status').innerText = "good luck";
 
@@ -152,8 +154,10 @@
             if (shouldWin) {
             addGyros(betAmount * 3); // reward the user with 3x their bet amount
             document.getElementById('status').innerText = "you won. i give you some gyros";
+            playSfx('mega_win');
             } else {
             document.getElementById('status').innerText = "bozo";
+            playSfx('losing_horn');
             }
         }, (BASE_SPINNING_DURATION + COLUMN_SPINNING_DURATION * cols.length) * 750);
     }
@@ -200,6 +204,12 @@
 
     function randomDuration() {
         return Math.floor(Math.random() * 10) / 100;
+    }
+
+    function playSfx(name) {
+        var sfxPlayer = document.getElementById('sfx-player');
+        sfxPlayer.src = '/sfx/' + name + '.mp3';
+        sfxPlayer.play();
     }
 </script>
 <style>
@@ -248,6 +258,8 @@
         left: 50%;
         margin-left: -320px;
         margin-top: -220px;
+
+        transform: scale(0.9);
     }
 
     .window {
