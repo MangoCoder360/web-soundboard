@@ -8,16 +8,12 @@ function init() {
 }
 
 function getMoreGyros() {
-    var gyros = Cookies.get('gyros');
-    if (gyros !== undefined) {
-        var randomAmount = Math.floor(Math.random() * 10) + 1;
-        gyros = parseInt(gyros) + randomAmount;
-        Cookies.set('gyros', gyros);
-        document.getElementById('gyros-amount').innerText = gyros;
-        document.title = 'you got ' + randomAmount + ' gyros!!!!!';
-    }
-
-    playSteamUiSound('deck_ui_positive_confirmation');
+    playSteamUiSound('deck_ui_launch_game');
+    document.body.style.display = 'none';
+    Cookies.set('minigame-allowed', "true");
+    setTimeout(() => {
+        window.open("/minigames/balls-game.html");
+    }, 500);
 }
 
 function pullNewBoosterPack() {

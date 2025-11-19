@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>balls game</title>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <meta robots="noindex, nofollow">
+</head>
+<body>
+    <h1>Score: 0</h1>
+    <h2>Gyros: <span id="gyro-count">0</span></h2>
+    <canvas id="canvas"></canvas>
+    <div id="toast-div">
+        <div id="leaderboard-container">
+            <h1>thank you for playing<br>i have rewarded you with some gyros</h1>
+        </div>
+    </div>
+</body>
+</html>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        font-family: sans-serif;
+    }
+    canvas {
+        border: 2px solid #00000000;
+        border-radius: 20px;
+        transition: all 1000ms;
+    }
+    h1 {
+        font-size: 2em;
+        margin: 5px;
+    }
+    h2 {
+        font-size: 1.5em;
+        margin: 10px;
+    }
+    #toast-div {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    #leaderboard-container {
+        background-color: rgba(0, 0, 0, 0);
+        padding: 10px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: all 800ms;
+        opacity: 0;
+        backdrop-filter: blur(10px) saturate(70%) brightness(70%);
+    }
+</style>
+<script>
+    var score = 0;
+    var lastScore = 0;
+    var isPaused = false;
+    var textColor;
+
+    var chaser_ball = {
+        x: 300,
+        y: 900,
+        radius: 25,
+        color: 'red',
+        dx: 0,
+        dy: 0,
+        speed: 1
+    }
+
+    var target_ball = {
+        x: 0,
+        y: 0,
+        radius: 40,
+        color: 'blue',
+    }
+
+    var particles = [];
+
+    var mouse_pos = {
+        x: 0,
+        y: 0
+    }
+
+    function calculate_gravity_to_position(ball, x, y, gravity_mult) {
+        var angle = Math.atan2(y - ball.y, x - ball.x);
+        ball.dx += Math.cos(angle) * gravity_mult;
+        ball.dy += Math.sin(angle) * gravity_mult;
+
+        ball.dx *= 0.95;
+        ball.dy *= 0.95;
+    }
+
+    function loadGyroCount() {
+        var gyros = Cookies.get('gyros');
+        if (gyros === undefined) {
+            Cookies.set('gyros', 0);
+            gyros = 0;
+        }
+        document.getElementById('gyro-count').innerText = gyros;
+    }
+
+    function addGyros(amount) {
+        var gyros = parseInt(Cookies.get('gyros') || '0', 0);
+        gyros += amount;
+        Cookies.set('gyros', gyros);
+        document.getElementById('gyro-count').innerText = gyros;
+    }
+
+    function check_if_chaser_hit_cursor(){
+        if (mouse_pos.x == 0 && mouse_pos.y == 0) return;
+        var distance = Math.sqrt(Math.pow(chaser_ball.x - mouse_pos.x, 2) + Math.pow(chaser_ball.y - mouse_pos.y, 2));
+        if(distance < chaser_ball.radius){
+            lastScore = score;
+            chaser_ball.x = document.getElementById('canvas').width / 2;
+            chaser_ball.y = 900;
+            chaser_ball.speed = 1;
+
+            setTimeout(() => {
+                isPaused = true;
+                document.getElementById('leaderboard-container').style.opacity = 1;
+                addGyros(lastScore);
+                setTimeout(() => {
+                    window.opener.location.reload();
+                    window.close();
+                }, 4000);
+            }, 50);
+        }
+    }
+
+    function check_if_cursor_hit_target(){
+        var distance = Math.sqrt(Math.pow(mouse_pos.x - target_ball.x, 2) + Math.pow(mouse_pos.y - target_ball.y, 2));
+        if(distance < target_ball.radius){
+            score++;
+            document.querySelector('h1').innerText = 'Score: ' + score;
+            chaser_ball.speed += 0.3;
+            createParticleFx(target_ball.x, target_ball.y);
+            send_target_ball_to_new_pos();
+        }
+    }
+
+    function send_target_ball_to_new_pos(){
+        target_ball.x = Math.random() * canvas.width;
+        target_ball.y = Math.random() * canvas.height;
+    }
+
+    function render_frame() {
+        if(isPaused) return;
+
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        calculate_gravity_to_position(chaser_ball, mouse_pos.x, mouse_pos.y, 0.1);
+
+        chaser_ball.x += chaser_ball.dx * chaser_ball.speed;
+        chaser_ball.y += chaser_ball.dy * chaser_ball.speed;
+
+        for(var i = 0; i < particles.length; i++){
+            var particle = particles[i];
+            particle.x += particle.dx;
+            particle.y += particle.dy;
+
+            calculate_gravity_to_position(particle, particle.x, particle.y + 80, 0.2);
+
+            if (particle.radius > 0.1) {
+                particle.radius -= 0.08;
+            }
+
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+            ctx.fillStyle = particle.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        ctx.beginPath();
+        ctx.arc(chaser_ball.x, chaser_ball.y, chaser_ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = chaser_ball.color;
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.arc(target_ball.x, target_ball.y, target_ball.radius, 0, Math.PI * 2);
+        ctx.fillStyle = target_ball.color;
+        ctx.fill();
+        ctx.closePath();
+
+        check_if_chaser_hit_cursor();
+        check_if_cursor_hit_target();
+
+        requestAnimationFrame(render_frame);
+    }
+
+    function createParticleFx(x, y){
+        for(var i = particles.length - 1; i >= 0; i--){
+            if(particles[i].radius <= 0.2){
+                particles.splice(i, 1);
+            }
+        }
+
+        for(var i = 0; i < 20; i++){
+            var particle = {
+                x: x,
+                y: y,
+                dx: Math.random() * 12 - 6,
+                dy: Math.random() * 12 - 10,
+                radius: 5,
+                color: textColor
+            }
+            particles.push(particle);
+        }
+    }
+
+    function get_canvas_coords_for_mouse_pos(event){
+        var canvas = document.getElementById('canvas');
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: event.clientX - rect.left,
+            y: event.clientY - rect.top
+        }
+    }
+
+    document.addEventListener('mousemove', function(event){
+        mouse_pos = get_canvas_coords_for_mouse_pos(event);
+    });
+
+    function init(){
+        // make sure the page is from window.open()
+        if(window.opener == null){
+            document.body.innerHTML = '<h1 style="font-family:sans-serif;">illegal</h1>';
+            return;
+        }
+
+        if(Cookies.get('minigame-allowed') != "true"){
+            document.body.innerHTML = '<h1 style="font-family:sans-serif;">rapscallion</h1>';
+            return;
+        } else {
+            Cookies.remove('minigame-allowed');
+        }
+
+        loadGyroCount();
+
+        var canvas = document.getElementById('canvas');
+        canvas.width = window.innerWidth * 0.93;
+        canvas.height = window.innerHeight * 0.8;
+
+        var { backgroundColor, textColor } = generateContrastingColors();
+
+        document.body.style.backgroundColor = backgroundColor;
+        document.body.style.color = textColor;
+        document.getElementById("canvas").style.borderColor = textColor;
+        target_ball.color = textColor;
+
+        send_target_ball_to_new_pos();
+        render_frame();
+    }
+
+    function getRandomColor(hueMin, hueMax, saturationMin, saturationMax, lightnessMin, lightnessMax) {
+        const hue = Math.floor(Math.random() * (hueMax - hueMin + 1)) + hueMin;
+        const saturation = Math.floor(Math.random() * (saturationMax - saturationMin + 1)) + saturationMin;
+        const lightness = Math.floor(Math.random() * (lightnessMax - lightnessMin + 1)) + lightnessMin;
+        return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+    }
+
+    function generateContrastingColors() {
+        // Generate a dark background color (low lightness, moderate saturation)
+        const backgroundColor = getRandomColor(0, 360, 30, 60, 10, 30); 
+
+        // Generate a light text color (high lightness, high saturation)
+        const textColor = getRandomColor(0, 360, 70, 100, 70, 90);
+
+        return { backgroundColor, textColor };
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
