@@ -3,6 +3,53 @@ body {
     text-align: center;
 }
 
+.soundboard {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(120px, 1fr));
+    gap: 24px;
+    width: min(760px, calc(100% - 32px));
+    margin: 40px auto;
+}
+
+.sound-button {
+    aspect-ratio: 1;
+    border: 8px solid #1c1c1c;
+    border-radius: 50%;
+    background: #f04f3d;
+    box-shadow: 0 8px 0 #9d2e25, 0 12px 18px rgba(0, 0, 0, 0.24);
+    color: #fff;
+    cursor: pointer;
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    font-weight: 800;
+    padding: 18px;
+    text-transform: uppercase;
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+.sound-button:hover {
+    background: #ff634f;
+    transform: translateY(-3px);
+}
+
+.sound-button:active,
+.sound-button.is-playing {
+    background: #d83b2f;
+    box-shadow: 0 3px 0 #9d2e25, 0 6px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(5px);
+}
+
+.sound-button:focus-visible {
+    outline: 4px solid #1c1c1c;
+    outline-offset: 5px;
+}
+
+@media (max-width: 600px) {
+    .soundboard {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+        gap: 18px;
+    }
+}
+
 .card-container {
     border: 2px solid black;
     width: 200px;

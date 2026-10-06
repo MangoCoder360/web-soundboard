@@ -12,12 +12,15 @@
 <body onload="init()">
     <h1>soundboard balls</h1>
     <h2>my gyros: <span id="gyros-amount"></span></h2>
+    <p>$5 per sound</p>
     <button onclick="getMoreGyros()">get more gyros</button>
     <button onclick="openSlotsUi()">go to the sl0ts machines</button><br><br><br>
-    <audio src="/sfx/boom.mp3" controls></audio>
-    <audio src="/sfx/fard.mp3" controls></audio>
-    <audio src="/sfx/saul_goodman.mp3" controls></audio>
-    <audio src="/sfx/bababooey.mp3" controls></audio>
+    <div class="soundboard" aria-label="Soundboard">
+        <button class="sound-button" type="button" onclick="playSound('/sfx/boom.mp3', this)">boom</button>
+        <button class="sound-button" type="button" onclick="playSound('/sfx/fard.mp3', this)">fard</button>
+        <button class="sound-button" type="button" onclick="playSound('/sfx/saul_goodman.mp3', this)">Saul Goodman</button>
+        <button class="sound-button" type="button" onclick="playSound('/sfx/bababooey.mp3', this)">bababooey</button>
+    </div>
 </body>
 <div id="slots-ui-container" style="display: none;">
     <iframe id="slots-ui" src="/slots.html"></iframe>
@@ -25,6 +28,6 @@
 </div>
 <div id="ad" style="display: none;">
     <div id="ad-header"></div>
-    <video id="ad-video" src="zackdfilms.mp4"></video>
+    <video id="ad-video"></video>
 </div>
 </html>

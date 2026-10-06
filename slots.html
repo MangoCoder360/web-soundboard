@@ -137,6 +137,8 @@
     function computeResults() {
         // randomly decide if the user should win or not
 
+        var gyros = parseInt(Cookies.get('gyros') || '0', 0);
+
         let winChance = 0.25;
 
         if(betAmount < 6) {
@@ -144,6 +146,10 @@
         }
         if(betAmount > 99) {
             winChance = 0.1;
+        }
+
+        if (gyros < 10) {
+            winChance += 0.1; // increase the chance to win if they have less than 10 gryros
         }
         
         let shouldWin = Math.random() < winChance;
