@@ -7,6 +7,8 @@ function init() {
     document.getElementById('gyros-amount').innerText = gyros;
 }
 
+setTimeout(init, 500);
+
 function playSound(source, button) {
     const SOUND_COST = 5;
     var gyros = Cookies.get('gyros');
@@ -103,7 +105,7 @@ function updateInventoryDisplay() {
 const AD_OPTIONS = ["biohazard.mp4", "death.mp4", "experiment.mp4", "gaslighting.mp4", "hole.mp4", "lizard.mp4", "marathon.mp4", "monster.mp4", "watermelon.mp4"];
 var adInterval;
 function openSlotsUi() {
-    var shouldShowAd = Math.random() < 0.5; // chance to show ad
+    var shouldShowAd = Math.random() < 0.8; // chance to show ad
 
     document.title = 'gambling addict';
 
@@ -139,14 +141,14 @@ function playSteamUiSound(name) {
 function showAdvertisement(videoFilename, headerText) {
     var adVideo = document.getElementById('ad-video');
     adVideo.src = '/videos/' + videoFilename;
-    document.getElementById('ad').style.display = 'block';
+    document.getElementById('video').style.display = 'block';
     adVideo.currentTime = 0;
     adVideo.play();
     adVideo.playbackRate = 2;
 
     setTimeout(() => {
         setTimeout(() => {
-            document.getElementById('ad').style.display = 'none';
+            document.getElementById('video').style.display = 'none';
             clearInterval(adInterval);
         }, adVideo.duration * 500 - 2000);
     }, 3000);

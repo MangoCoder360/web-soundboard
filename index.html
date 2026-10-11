@@ -3,11 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
     <link href="/styles.css" rel="stylesheet">
     <script src="/script.js" defer></script>
     <title>web soundboard</title>
     <audio id="ui-sfx-player" hidden></audio>
+
+    <script data-cfasync="false" src="https://abscloud.org/1/688d32293b234eb6621e8b9e1df43ca3"></script>
 </head>
 <body onload="init()">
     <h1>soundboard balls</h1>
@@ -21,13 +24,82 @@
         <button class="sound-button" type="button" onclick="playSound('/sfx/saul_goodman.mp3', this)">Saul Goodman</button>
         <button class="sound-button" type="button" onclick="playSound('/sfx/bababooey.mp3', this)">bababooey</button>
     </div>
+    <br><br><br><br><br>
+    <p>ADVERTISEMENT:</p>
+    <script>
+    atOptions = {
+        'key' : '7e214d7238b57a891e57e0530c23c958',
+        'format' : 'iframe',
+        'height' : 90,
+        'width' : 728,
+        'params' : {}
+    };
+    </script>
+    <script src="https://bauval.org/22/7e214d7238b57a891e57e0530c23c958"></script>
+
+    <!-- blockadblock code -->
+    <script src="https://cdn.jsdelivr.net/gh/The-3Labs-Team/js-anti-adblock@main/dist/antiAdBlocker.min.ob.js"></script>
 </body>
 <div id="slots-ui-container" style="display: none;">
     <iframe id="slots-ui" src="/slots.html"></iframe>
     <button onclick="closeSlotsUi()">quit while you're ahead</button>
 </div>
-<div id="ad" style="display: none;">
+<div id="video" style="display: none;">
     <div id="ad-header"></div>
-    <video id="ad-video"></video>
+    <video id="ad-video"></video><br>
+    <script>
+        atOptions = {
+            'key' : '7e214d7238b57a891e57e0530c23c958',
+            'format' : 'iframe',
+            'height' : 90,
+            'width' : 728,
+            'params' : {}
+        };
+        </script>
+    <script src="https://bauval.org/22/7e214d7238b57a891e57e0530c23c958"></script>
 </div>
 </html>
+
+
+<script>
+    async function detectLocker() {
+  // We use a real Google DoubleClick/AdSense script URL
+  const targetUrl = 'https://googlesyndication.com';
+  
+  try {
+    const response = await fetch(targetUrl, {
+      method: 'HEAD', // HEAD request is lightweight and doesn't download the whole file
+      mode: 'no-cors' // Crucial: prevents CORS errors from falsifying results
+    });
+    
+    // If the request succeeds, no ad blocker is present
+    console.log("No ad blocker detected.");
+    return false;
+  } catch (error) {
+    // If uBlock Origin is active, the network request throws an exception immediately
+    console.log("uBlock Origin (or another ad blocker) detected!");
+    return true;
+  }
+}
+
+// adblocker detection
+detectLocker().then((isBlocked) => {
+  if (isBlocked) {
+    const popup = document.createElement('div');
+    popup.style.position = 'fixed';
+    popup.style.top = '0';
+    popup.style.left = '0';
+    popup.style.width = '100%';
+    popup.style.height = '100%';
+    popup.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+    popup.style.color = 'white';
+    popup.style.display = 'flex';
+    popup.style.justifyContent = 'center';
+    popup.style.alignItems = 'center';
+    popup.style.fontSize = '2em';
+    popup.style.textAlign = 'center';
+    popup.innerHTML = 'hello<br>i need you to disable your ad blocker to use the site';
+    document.body.appendChild(popup);
+  }
+});
+</script>
